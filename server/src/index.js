@@ -1,11 +1,11 @@
 import express from 'express'
 import cors from 'cors'
 import 'dotenv/config'
+import scoreRouter from './routes/score.js'
 
 const app = express()
 const PORT = process.env.PORT || 3001
 
-// ─── Middleware ───────────────────────────────────────────────────
 app.use(cors({
   origin: process.env.CLIENT_URL || 'http://localhost:3000',
   credentials: true,
@@ -28,6 +28,8 @@ app.get('/health', (_req, res) => {
   })
 })
 
+app.use('/api/score', scoreRouter)
+
 // ─── 404 ──────────────────────────────────────────────────────────
 app.use((_req, res) => {
   res.status(404).json({ error: 'Rota não encontrada' })
@@ -39,7 +41,6 @@ app.use((err, _req, res, _next) => {
   res.status(500).json({ error: 'Erro interno do servidor' })
 })
 
-// ─── Start ────────────────────────────────────────────────────────
 app.listen(PORT, () => {
   console.log(`\n🔴 Liqr server a correr em http://localhost:${PORT}\n`)
 })
