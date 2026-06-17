@@ -1,7 +1,10 @@
+// ─── Liqr Server ─────────────────────────────────────────────────
+
 import express from 'express'
 import cors from 'cors'
 import 'dotenv/config'
 import scoreRouter from './routes/score.js'
+import chatRouter  from './routes/chat.js'
 
 const app = express()
 const PORT = process.env.PORT || 3001
@@ -29,6 +32,7 @@ app.get('/health', (_req, res) => {
 })
 
 app.use('/api/score', scoreRouter)
+app.use('/api/chat',  chatRouter)
 
 // ─── 404 ──────────────────────────────────────────────────────────
 app.use((_req, res) => {
