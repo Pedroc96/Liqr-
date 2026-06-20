@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { motion, useMotionValue, useTransform, PanInfo } from 'framer-motion'
 import Image from 'next/image'
 import { Profile, ScoreBreakdown } from '@/lib/types'
 import { calculateScore } from '@/lib/api'
@@ -14,6 +15,11 @@ interface ProfileCardProps {
 export default function ProfileCard({ profile, onSkip, onLike }: ProfileCardProps) {
   const [score, setScore] = useState<ScoreBreakdown | null>(null)
   const [loading, setLoading] = useState(true)
+
+  const x = useMotionValue(0)
+  const rotate = useTransform(x, [-200, 200], [-15, 15])
+  const likeOpacity = useTransform(x, [20, 120], [0, 1])
+  const skipOpacity = useTransform(x, [-120, -20], [1, 0])
 
   useEffect(() => {
     setLoading(true)
@@ -31,16 +37,51 @@ export default function ProfileCard({ profile, onSkip, onLike }: ProfileCardProp
         : 'text-red-400'
     : 'text-gray-500'
 
+  function handleDragEnd(_: never, info: PanInfo) {
+    const threshold = 100
+    if (info.offset.x > threshold) {
+      onLike()
+    } else if (info.offset.x < -threshold) {
+      onSkip()
+    }
+  }
+
   return (
-    <div className="bg-zinc-950 border border-zinc-800 rounded-xl overflow-hidden w-full max-w-sm">
+    <motion.div
+      style={{ x, rotate }}
+      drag="x"
+      dragConstraints={{ left: 0, right: 0 }}
+      dragElastic={0.7}
+      onDragEnd={handleDragEnd}
+      whileTap={{ cursor: 'grabbing' }}
+      className="bg-zinc-950 border border-zinc-800 rounded-xl overflow-hidden w-full max-w-sm cursor-grab select-none"
+    >
       {/* Imagem */}
       <div className="relative h-72 bg-zinc-900">
         <Image
           src={profile.imageUrl}
           alt={profile.name}
           fill
-          className="object-cover"
+          className="object-cover pointer-events-none"
+          draggable={false}
         />
+
+        {/* Indicador INVESTIR */}
+        <motion.div
+          style={{ opacity: likeOpacity }}
+          className="absolute top-6 left-6 border-2 border-green-500 rounded px-3 py-1 rotate-[-15deg]"
+        >
+          <span className="text-green-500 font-bold text-lg tracking-wider">INVESTIR</span>
+        </motion.div>
+
+        {/* Indicador DESCARTAR */}
+        <motion.div
+          style={{ opacity: skipOpacity }}
+          className="absolute top-6 right-6 border-2 border-red-500 rounded px-3 py-1 rotate-[15deg]"
+        >
+          <span className="text-red-500 font-bold text-lg tracking-wider">DESCARTAR</span>
+        </motion.div>
+
         <div className="absolute top-3 right-3 bg-black/70 border border-zinc-700 rounded px-2 py-1">
           <span className={`text-sm font-medium ${scoreColor}`}>
             {loading ? '...' : score ? `Score ${score.total}` : '—'}
@@ -102,6 +143,6 @@ export default function ProfileCard({ profile, onSkip, onLike }: ProfileCardProp
           Investir
         </button>
       </div>
-    </div>
+    </motion.div>
   )
 }
