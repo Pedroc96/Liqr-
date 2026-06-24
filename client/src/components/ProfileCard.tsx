@@ -1,48 +1,52 @@
-'use client'
+"use client";
 
-import { useState, useEffect } from 'react'
-import { motion, useMotionValue, useTransform, PanInfo } from 'framer-motion'
-import Image from 'next/image'
-import { Profile, ScoreBreakdown } from '@/lib/types'
-import { calculateScore } from '@/lib/api'
+import { useState, useEffect } from "react";
+import { motion, useMotionValue, useTransform, PanInfo } from "framer-motion";
+import Image from "next/image";
+import { Profile, ScoreBreakdown, incomeToLabel } from "@/lib/types";
+import { calculateScore } from "@/lib/api";
 
 interface ProfileCardProps {
-  profile: Profile
-  onSkip: () => void
-  onLike: () => void
+  profile: Profile;
+  onSkip: () => void;
+  onLike: () => void;
 }
 
-export default function ProfileCard({ profile, onSkip, onLike }: ProfileCardProps) {
-  const [score, setScore] = useState<ScoreBreakdown | null>(null)
-  const [loading, setLoading] = useState(true)
+export default function ProfileCard({
+  profile,
+  onSkip,
+  onLike,
+}: ProfileCardProps) {
+  const [score, setScore] = useState<ScoreBreakdown | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const x = useMotionValue(0)
-  const rotate = useTransform(x, [-200, 200], [-15, 15])
-  const likeOpacity = useTransform(x, [20, 120], [0, 1])
-  const skipOpacity = useTransform(x, [-120, -20], [1, 0])
+  const x = useMotionValue(0);
+  const rotate = useTransform(x, [-200, 200], [-15, 15]);
+  const likeOpacity = useTransform(x, [20, 120], [0, 1]);
+  const skipOpacity = useTransform(x, [-120, -20], [1, 0]);
 
   useEffect(() => {
-    setLoading(true)
+    setLoading(true);
     calculateScore(profile)
       .then(setScore)
       .catch(() => setScore(null))
-      .finally(() => setLoading(false))
-  }, [profile])
+      .finally(() => setLoading(false));
+  }, [profile]);
 
   const scoreColor = score
     ? score.total >= 80
-      ? 'text-green-400'
+      ? "text-green-400"
       : score.total >= 60
-        ? 'text-amber-400'
-        : 'text-red-400'
-    : 'text-gray-500'
+      ? "text-amber-400"
+      : "text-red-400"
+    : "text-gray-500";
 
   function handleDragEnd(_: never, info: PanInfo) {
-    const threshold = 100
+    const threshold = 100;
     if (info.offset.x > threshold) {
-      onLike()
+      onLike();
     } else if (info.offset.x < -threshold) {
-      onSkip()
+      onSkip();
     }
   }
 
@@ -53,7 +57,7 @@ export default function ProfileCard({ profile, onSkip, onLike }: ProfileCardProp
       dragConstraints={{ left: 0, right: 0 }}
       dragElastic={0.7}
       onDragEnd={handleDragEnd}
-      whileTap={{ cursor: 'grabbing' }}
+      whileTap={{ cursor: "grabbing" }}
       className="bg-zinc-950 border border-zinc-800 rounded-xl overflow-hidden w-full max-w-sm cursor-grab select-none"
     >
       {/* Imagem */}
@@ -71,7 +75,9 @@ export default function ProfileCard({ profile, onSkip, onLike }: ProfileCardProp
           style={{ opacity: likeOpacity }}
           className="absolute top-6 left-6 border-2 border-green-500 rounded px-3 py-1 rotate-[-15deg]"
         >
-          <span className="text-green-500 font-bold text-lg tracking-wider">INVESTIR</span>
+          <span className="text-green-500 font-bold text-lg tracking-wider">
+            INVESTIR
+          </span>
         </motion.div>
 
         {/* Indicador DESCARTAR */}
@@ -79,12 +85,14 @@ export default function ProfileCard({ profile, onSkip, onLike }: ProfileCardProp
           style={{ opacity: skipOpacity }}
           className="absolute top-6 right-6 border-2 border-red-500 rounded px-3 py-1 rotate-[15deg]"
         >
-          <span className="text-red-500 font-bold text-lg tracking-wider">DESCARTAR</span>
+          <span className="text-red-500 font-bold text-lg tracking-wider">
+            DESCARTAR
+          </span>
         </motion.div>
 
         <div className="absolute top-3 right-3 bg-black/70 border border-zinc-700 rounded px-2 py-1">
           <span className={`text-sm font-medium ${scoreColor}`}>
-            {loading ? '...' : score ? `Score ${score.total}` : '—'}
+            {loading ? "..." : score ? `Score ${score.total}` : "—"}
           </span>
         </div>
       </div>
@@ -100,24 +108,22 @@ export default function ProfileCard({ profile, onSkip, onLike }: ProfileCardProp
         </p>
 
         {/* Stats */}
-        <div className="grid grid-cols-3 gap-2 mt-4 border border-zinc-800 rounded">
+        <div className="grid grid-cols-2 gap-2 mt-4 border border-zinc-800 rounded">
           <div className="p-2 text-center border-r border-zinc-800">
             <div className="text-amber-200 text-sm font-medium">
-              €{profile.monthlyIncome}
+              {incomeToLabel(profile.monthlyIncome)}
             </div>
-            <div className="text-[10px] text-zinc-600 uppercase mt-1">Rendimento</div>
-          </div>
-          <div className="p-2 text-center border-r border-zinc-800">
-            <div className="text-amber-200 text-sm font-medium capitalize">
-              {profile.lifestyle}
+            <div className="text-[10px] text-zinc-600 uppercase mt-1">
+              Estilo de vida
             </div>
-            <div className="text-[10px] text-zinc-600 uppercase mt-1">Estilo</div>
           </div>
           <div className="p-2 text-center">
             <div className="text-amber-200 text-sm font-medium">
               {profile.appearanceScore}/10
             </div>
-            <div className="text-[10px] text-zinc-600 uppercase mt-1">Aparência</div>
+            <div className="text-[10px] text-zinc-600 uppercase mt-1">
+              Aparência
+            </div>
           </div>
         </div>
 
@@ -144,5 +150,5 @@ export default function ProfileCard({ profile, onSkip, onLike }: ProfileCardProp
         </button>
       </div>
     </motion.div>
-  )
+  );
 }

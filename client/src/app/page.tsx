@@ -3,12 +3,13 @@
 import { useState } from 'react'
 import { AnimatePresence } from 'framer-motion'
 import ProfileCard from '@/components/ProfileCard'
+import Mirror from '@/components/Mirror'
 import { PROFILES } from '@/lib/profiles'
 import { useSession } from '@/hooks/useSession'
 
 export default function Home() {
   const [index, setIndex] = useState(0)
-  const { liked, skipped, recordSwipe } = useSession()
+  const { history, recordSwipe, reset } = useSession()
   const profile = PROFILES[index]
 
   const handleSwipe = (action: 'like' | 'skip') => {
@@ -17,21 +18,13 @@ export default function Home() {
     setIndex((i) => i + 1)
   }
 
+  const handleRestart = () => {
+    reset()
+    setIndex(0)
+  }
+
   if (!profile) {
-    return (
-      <main className="min-h-screen bg-black flex flex-col items-center justify-center gap-4 p-6">
-        <h1 className="text-2xl text-amber-100 italic font-serif">Sessão terminada</h1>
-        <p className="text-zinc-500 text-sm">
-          Investiste em {liked.length} pessoas. Descartaste {skipped.length}.
-        </p>
-        <div className="text-xs text-zinc-600 mt-4">
-          <p className="mb-2">Descartaste:</p>
-          {skipped.map((p) => (
-            <p key={p.id}>· {p.name}</p>
-          ))}
-        </div>
-      </main>
-    )
+    return <Mirror history={history} onRestart={handleRestart} />
   }
 
   return (

@@ -34,3 +34,11 @@ export interface ChatMessage {
   role: 'user' | 'assistant'
   content: string
 }
+
+export function incomeToLabel(monthlyIncome: number): string {
+  if (monthlyIncome < 1000) return 'Risco alto'
+  if (monthlyIncome < 2000) return 'Risco moderado'
+  if (monthlyIncome < 3500) return 'Equilibrado'
+  if (monthlyIncome < 6000) return 'Baixo risco'
+  return 'Activo premium'
+}
